@@ -21,7 +21,8 @@ def default_parser():
     parser.add_argument(
         "--root-dir", type=str, required=True, help="path for model checkpoints"
     )
-    parser.add_argument("--max-bsz", type=int, default=1, help="#images to generate")
+    parser.add_argument("--n-samples", type=int, default=1, help="#images to generate")
+    parser.add_argument("--max-bsz", type=int, default=1, help="#images to generate in a batch")
     parser.add_argument(
         "--output-dir",
         type=str,
@@ -67,7 +68,7 @@ if __name__ == "__main__":
         use_bf16=args.use_bf16,
     )
 
-    for i in range(5):
+    for i in range(args.n_samples):
         t1 = time.time()
 
         images = iter(
