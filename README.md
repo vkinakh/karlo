@@ -16,32 +16,11 @@ Input image:
 </p>
 
 Variations:
-<style>
-.column {
-  float: left;
-  width: 33.33%;
-  padding: 5px;
-}
-
-/* Clear floats after image containers */
-.row::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-</style>
-
-<div class="row">
-  <div class="column">
+<p float="left">
     <img src="/assets/ILSVRC2012_val_00003014_00.jpg">
-  </div>
-  <div class="column">
     <img src="/assets/ILSVRC2012_val_00003014_01.jpg">
-  </div>
-  <div class="column">
     <img src="/assets/ILSVRC2012_val_00003014_02.jpg">
-  </div>
-</div>
+</p>
 
 
 - [weighted interpolation between multiple images](#weighted-images-interpolation-command-lind-example)
