@@ -64,32 +64,33 @@ if __name__ == "__main__":
         use_bf16=args.use_bf16,
     )
 
-    images = [Image.open(img_path).convert('RGB') for img_path in args.img_paths]
+    images_input = [Image.open(img_path).convert('RGB') for img_path in args.img_paths]
     if args.img_weights is None and args.text_weight is None:
-        args.img_weights = [1.0 / (len(images) + 1)] * len(images)
-        args.text_weight = 1.0 / (len(images) + 1)
+        args.img_weights = [1.0 / (len(images_input) + 1)] * len(images_input)
+        args.text_weight = 1.0 / (len(images_input) + 1)
     elif args.img_weights is None:
-        args.img_weights = [(1.0 - args.text_weight) / len(images)] * len(images)
+        args.img_weights = [(1.0 - args.text_weight) / len(images_input)] * len(images_input)
     elif args.text_weight is None:
-        args.text_weight = (1.0 - sum(args.img_weights)) / len(images)
+        args.text_weight = (1.0 - sum(args.img_weights)) / len(images_input)
 
-    assert len(args.img_weights) == len(images)
+    assert len(args.img_weights) == len(images_input)
     assert sum(args.img_weights) + args.text_weight == 1.0
 
     for i in range(args.n_samples):
         t1 = time.time()
+        img_weights = args.img_weights
 
         images = iter(
             model(
                 args.prompt,
-                images,
+                images_input,
                 args.text_weight,
-                args.img_weights,
+                img_weights,
                 progressive_mode="final"
             )
         ).__next__()
         # NCHW, [0, 1], float32 -> NHWC, [0, 255], uint8
-        images = (
+        images_out = (
             torch.permute(images * 255.0, [0, 2, 3, 1]).type(torch.uint8).cpu().numpy()
         )
 
@@ -98,6 +99,6 @@ if __name__ == "__main__":
         logging.info(f"Iteration {i} -- {execution_time:.6f}secs")
 
         # Select the first one
-        image = Image.fromarray(images[0])
+        image = Image.fromarray(images_out[0])
         image_name = "_".join(args.prompt.split(" "))
         image.save(f"{save_dir}/{image_name}_text_plus_images_{i:02d}.jpg")

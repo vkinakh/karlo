@@ -149,8 +149,8 @@ class TextPlusImagesSampler(BaseSampler):
             # Combine text and image features by weighted sum
             # append text_to_img_feat to img_feats
             img_feats = torch.cat([img_feats, text_to_img_feat], dim=0)
-            img_weights = torch.tensor(img_weights + [text_weight], device="cuda")
-            img_feat = torch.sum(img_feats * img_weights.unsqueeze(1), dim=0, keepdim=True)
+            weights = torch.tensor(img_weights + [text_weight], device="cuda")
+            img_feat = torch.sum(img_feats * weights.unsqueeze(1), dim=0, keepdim=True)
 
             """ Generate 64x64px images """
             images_64_outputs = self._decoder(
