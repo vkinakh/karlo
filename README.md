@@ -9,6 +9,41 @@ CHANGE:
 This repository implements scripts for extended use of Karlo model such as:
 
 - [image variations](#images-variations-command-line-example)
+
+Input image:
+<p float="left">
+<img src="/assets/variations_input.JPEG"/>
+</p>
+
+Variations:
+<style>
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
+
+<div class="row">
+  <div class="column">
+    <img src="/assets/ILSVRC2012_val_00003014_00.jpg">
+  </div>
+  <div class="column">
+    <img src="/assets/ILSVRC2012_val_00003014_01.jpg">
+  </div>
+  <div class="column">
+    <img src="/assets/ILSVRC2012_val_00003014_02.jpg">
+  </div>
+</div>
+
+
 - [weighted interpolation between multiple images](#weighted-images-interpolation-command-lind-example)
 - [combination of multiple images and prompt conditioning](#text-plus-images-generation-command-line-example)
 
