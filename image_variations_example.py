@@ -17,7 +17,7 @@ def default_parser():
         "--root-dir", type=str, required=True, help="path for model checkpoints"
     )
     parser.add_argument("--n-samples", type=int, default=1, help="#images to generate")
-    parser.add_argument("--max-bsz", type=int, default=1, help="#images to generate")
+    parser.add_argument("--max-bsz", type=int, default=1, help="#Batch size to generate")
     parser.add_argument(
         "--output-dir",
         type=str,

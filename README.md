@@ -1,6 +1,18 @@
 # Karlo-v1.0.alpha on COYO-100M and CC15M
 
-Karlo is a text-conditional image generation model based on OpenAI's unCLIP architecture with the improvement over the standard super-resolution model from 64px to 256px, recovering high-frequency details only in the small number of denoising steps.
+Karlo is a text-conditional image generation model based on OpenAI's unCLIP architecture with the improvement over the 
+standard super-resolution model from 64px to 256px, recovering high-frequency details only in the small number of 
+denoising steps. 
+
+<b>
+CHANGE:
+This repository implements scripts for extended use of Karlo model such as:
+
+- image variations
+- weighted interpolation between multiple images
+- combination of multiple images and prompt conditioning
+
+</b>
 
 <p float="left">
   <img src="/assets/example.gif"/>
@@ -147,15 +159,58 @@ In each case, the first row shows T2I samples and the second shows the image var
 
 
 ### T2I command line example
-Here, we include the command line example of T2I. For image variation, you can refer to [karlo/sampler/i2i.py](karlo/sampler/i2i.py) on how to replace the prior into the clip image feature.
-Add `--use_bf16` to use `bfloat16` precision to be able to run on one 11GB GPU.
+Here, we include the command line example of T2I. Add `--use_bf16` to use `bfloat16` precision to be able to run on 
+a single 11GB GPU.
 ```python
-python example.py --root-dir=$KARLO_ROOT_DIR \
-                  --prompt="A man with a face of avocado, in the drawing style of Rene Magritte" \
-                  --output-dir=$OUTPUT_DIR \
-                  --max-bsz=2 \
-                  --sampling-type= \
-                  --use_bf16
+python text_to_image_example.py --root-dir=$KARLO_ROOT_DIR \
+                                --prompt="A man with a face of avocado, in the drawing style of Rene Magritte" \
+                                --output-dir=$OUTPUT_DIR \
+                                --max-bsz=2 \
+                                --n-samples=1 \
+                                --sampling-type="fast"\
+                                --use_bf16
+```
+
+
+### Images variations command line example
+Here command line for image variations. Add `--use_bf16` to use `bfloat16` precision to be able to run on 
+a single 11GB GPU.
+```python
+python image_variations_example.py --root-dir=$KARLO_ROOT_DIR \
+                                   --n-samples=5 \
+                                   --max-bsz=1 \
+                                   --output-dir=$OUTPUT_DIR \
+                                   --sampling-type="fast" \
+                                   --img-path="./img1.png" \
+                                   --use_bf16
+```
+
+### Weighted images interpolation command lind example
+Here command line for weighted image interpolation. Add `--use_bf16` to use `bfloat16` precision to be able to run on 
+a single 11GB GPU.
+```python
+python image_interpolation_example.py --root-dir=$KARLO_ROOT_DIR \
+                                      --n-samples=5 \
+                                      --output-dir=$OUTPUT_DIR \
+                                      --sampling-type="fast" \
+                                      --img-paths ./img1.png ./img2.png ./img3.png \
+                                      --weights 0.5 0.25 0.25 \
+                                      --use_bf16
+```
+
+### Text plus images generation command line example
+Here command line for text plus images generation. Add `--use_bf16` to use `bfloat16` precision to be able to run on 
+a single 11GB GPU.
+```python
+python text_plus_images_example.py --root-dir=$KARLO_ROOT_DIR \
+                                   --n-samples=5 \
+                                   --output-dir=$OUTPUT_DIR \
+                                   --sampling-type="fast" \
+                                   --img-paths ./img1.png ./img2.png \
+                                   --prompt="A chair in the shape of avocado" \
+                                   --img-weights 0.25 0.25 \
+                                   --text-weight=0.5 \
+                                   --use_bf16
 ```
 
 ## Licence and Disclaimer
