@@ -8,9 +8,9 @@ denoising steps.
 CHANGE:
 This repository implements scripts for extended use of Karlo model such as:
 
-- image variations
-- weighted interpolation between multiple images
-- combination of multiple images and prompt conditioning
+- [image variations](#images-variations-command-line-example)
+- [weighted interpolation between multiple images](#weighted-images-interpolation-command-lind-example)
+- [combination of multiple images and prompt conditioning](#text-plus-images-generation-command-line-example)
 
 </b>
 
