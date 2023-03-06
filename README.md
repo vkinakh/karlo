@@ -4,9 +4,7 @@ Karlo is a text-conditional image generation model based on OpenAI's unCLIP arch
 standard super-resolution model from 64px to 256px, recovering high-frequency details only in the small number of 
 denoising steps. 
 
-<b>
-CHANGE:
-This repository implements scripts for extended use of Karlo model such as:
+<b>CHANGE: This repository implements scripts for extended use of Karlo model such as:</b>
 
 - [image variations](#images-variations-command-line-example)
 
@@ -30,7 +28,7 @@ Input images:
    <img src="/assets/goblin.png">
 </p>
 
-Combinations
+Combinations:
 <p float="left">
    <img src="/assets/spiderman_interpolate_00.jpg">
    <img src="/assets/spiderman_interpolate_01.jpg">
@@ -39,12 +37,28 @@ Combinations
 
 - [combination of multiple images and prompt conditioning](#text-plus-images-generation-command-line-example)
 
-</b>
+Input images:
+<p float="left">
+   <img src="/assets/spiderman.png">
+   <img src="/assets/goblin.png">
+</p>
 
+Prompt: <i>" picture of half spiderman half goblin supervilan, in a style of comicbooks</i>
+
+<p float="left">
+    <img src="/assets/A_picture_of_half_spiderman_half_goblin_supervilan,_in_a_style_of_comicbooks_text_plus_images_00.jpg">
+    <img src="/assets/A_picture_of_half_spiderman_half_goblin_supervilan,_in_a_style_of_comicbooks_text_plus_images_01.jpg">
+    <img src="/assets/A_picture_of_half_spiderman_half_goblin_supervilan,_in_a_style_of_comicbooks_text_plus_images_02.jpg">
+</p>
+
+
+Generation:
 <p float="left">
   <img src="/assets/example.gif"/>
 </p>
 
+
+Other examples:
 <details>
   <summary>"a portrait of an old monk, highly detailed."</summary>
   <p float="left">
