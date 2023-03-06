@@ -63,7 +63,7 @@ if __name__ == "__main__":
         use_bf16=args.use_bf16,
     )
 
-    img_input = Image.open(args.img_path)
+    img_input = Image.open(args.img_path).convert('RGB')
 
     for i in range(args.n_samples):
         t1 = time.time()

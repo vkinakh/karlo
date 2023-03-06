@@ -62,7 +62,7 @@ if __name__ == "__main__":
         use_bf16=args.use_bf16,
     )
 
-    images_input = [Image.open(img_path) for img_path in args.img_paths]
+    images_input = [Image.open(img_path).convert('RGB') for img_path in args.img_paths]
     if args.weights is not None:
         assert len(args.weights) == len(images_input)
         assert sum(args.weights) == 1.0

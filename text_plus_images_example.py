@@ -64,7 +64,7 @@ if __name__ == "__main__":
         use_bf16=args.use_bf16,
     )
 
-    images = [Image.open(img_path) for img_path in args.img_paths]
+    images = [Image.open(img_path).convert('RGB') for img_path in args.img_paths]
     if args.img_weights is None and args.text_weight is None:
         args.img_weights = [1.0 / (len(images) + 1)] * len(images)
         args.text_weight = 1.0 / (len(images) + 1)
