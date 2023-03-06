@@ -22,8 +22,21 @@ Variations:
     <img src="/assets/ILSVRC2012_val_00003014_02.jpg">
 </p>
 
-
 - [weighted interpolation between multiple images](#weighted-images-interpolation-command-lind-example)
+
+Input images:
+<p float="left">
+   <img src="/assets/spiderman.png">
+   <img src="/assets/goblin.png">
+</p>
+
+Combinations
+<p float="left">
+   <img src="/assets/spiderman_interpolate_00.jpg">
+   <img src="/assets/spiderman_interpolate_01.jpg">
+   <img src="/assets/spiderman_interpolate_02.jpg">
+</p>
+
 - [combination of multiple images and prompt conditioning](#text-plus-images-generation-command-line-example)
 
 </b>
