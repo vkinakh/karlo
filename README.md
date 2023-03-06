@@ -34,7 +34,7 @@ Combinations
 <p float="left">
    <img src="/assets/spiderman_interpolate_00.jpg">
    <img src="/assets/spiderman_interpolate_01.jpg">
-   <img src="/assets/spiderman_interpolate_02.jpg">
+   <img src="/assets/spiderman_interpolate_03.jpg">
 </p>
 
 - [combination of multiple images and prompt conditioning](#text-plus-images-generation-command-line-example)
