@@ -1,9 +1,4 @@
-# ------------------------------------------------------------------------------------
-# Karlo-v1.0.alpha
-# Copyright (c) 2022 KakaoBrain. All Rights Reserved.
-# ------------------------------------------------------------------------------------
-
-from typing import Iterator
+from typing import Iterator, List
 
 import torch
 import torchvision.transforms.functional as TVF
@@ -12,11 +7,9 @@ from torchvision.transforms import InterpolationMode
 from .template import BaseSampler, CKPT_PATH
 
 
-class I2ISampler(BaseSampler):
+class TextPlusImagesSampler(BaseSampler):
     """
-    A sampler for image variation. In the original unclip paper, image variation transforms the noise obtained by DDIM
-    inversion into a sample in RGB space.
-    Here, we simply transform the white noise to image, conditioned on the clip image feature.
+    A sampler that generates images using images and text conditioning.
 
     :param root_dir: directory for model checkpoints.
     :param sampling_type: ["default", "fast"]
@@ -47,40 +40,32 @@ class I2ISampler(BaseSampler):
             use_bf16=use_bf16,
         )
         model.load_clip(clip_model_path)
+        model.load_prior(
+            f"{CKPT_PATH['prior']}",
+            clip_stat_path=clip_stat_path,
+        )
         model.load_decoder(f"{CKPT_PATH['decoder']}")
         model.load_sr_64_256(CKPT_PATH["sr_256"])
 
         return model
 
-    def preprocess(
+    def preprocess_text(
         self,
-        image,
         prompt: str,
-        bsz: int,
     ):
-        prompts_batch = [prompt for _ in range(bsz)]
+        """Setup prompts & cfg scales"""
+        prompts_batch = [prompt]
+
+        prior_cf_scales_batch = [self._prior_cf_scale] * len(prompts_batch)
+        prior_cf_scales_batch = torch.tensor(prior_cf_scales_batch, device="cuda")
+
         decoder_cf_scales_batch = [self._decoder_cf_scale] * len(prompts_batch)
         decoder_cf_scales_batch = torch.tensor(decoder_cf_scales_batch, device="cuda")
 
-        # preprocess input image
-        image = TVF.normalize(
-            TVF.to_tensor(
-                TVF.resize(
-                    image,
-                    [224, 224],
-                    interpolation=InterpolationMode.BICUBIC,
-                    antialias=True,
-                )
-            ),
-            mean=[0.48145466, 0.4578275, 0.40821073],
-            std=[0.26862954, 0.26130258, 0.27577711],
-        ).unsqueeze(0)
-        image_batch = image.repeat(bsz, 1, 1, 1).cuda()
-
-        """ Get CLIP text and image features """
+        """ Get CLIP text feature """
         clip_model = self._clip
         tokenizer = self._tokenizer
-        max_txt_length = 77
+        max_txt_length = self._prior.model.text_ctx
 
         tok, mask = tokenizer.padded_tokens_and_mask(prompts_batch, max_txt_length)
         cf_token, cf_mask = tokenizer.padded_tokens_and_mask([""], max_txt_length)
@@ -93,39 +78,79 @@ class I2ISampler(BaseSampler):
 
         tok, mask = tok.to(device="cuda"), mask.to(device="cuda")
         txt_feat, txt_feat_seq = clip_model.encode_text(tok)
-        img_feat = clip_model.encode_image(image_batch)
 
         return (
             prompts_batch,
+            prior_cf_scales_batch,
             decoder_cf_scales_batch,
             txt_feat,
             txt_feat_seq,
             tok,
             mask,
-            img_feat,
         )
+
+    def preprocess_images(
+        self,
+        images: List,
+    ):
+        # preprocess input image
+        images = [TVF.normalize(
+            TVF.to_tensor(
+                TVF.resize(
+                    image,
+                    [224, 224],
+                    interpolation=InterpolationMode.BICUBIC,
+                    antialias=True,
+                )
+            ),
+            mean=[0.48145466, 0.4578275, 0.40821073],
+            std=[0.26862954, 0.26130258, 0.27577711],
+        ) for image in images]
+        image_batch = torch.stack(images).cuda()
+
+        """ Get CLIP text and image features """
+        clip_model = self._clip
+
+        img_feats = clip_model.encode_image(image_batch)
+        return img_feats
 
     def __call__(
         self,
-        image,
-        bsz: int,
+        prompt: str,
+        images: List,
+        text_weight: float,
+        img_weights: List[float],
         progressive_mode=None,
     ) -> Iterator[torch.Tensor]:
         assert progressive_mode in ("loop", "stage", "final")
+        assert len(images) == len(img_weights)
+
         with torch.no_grad(), torch.cuda.amp.autocast():
+            img_feats = self.preprocess_images(images)
             (
                 prompts_batch,
+                prior_cf_scales_batch,
                 decoder_cf_scales_batch,
                 txt_feat,
                 txt_feat_seq,
                 tok,
                 mask,
-                img_feat,
-            ) = self.preprocess(
-                image=image,
-                prompt="",
-                bsz=bsz,
+            ) = self.preprocess_text(prompt)
+
+            # Transform CLIP text feature into image feature
+            text_to_img_feat = self._prior(
+                txt_feat,
+                txt_feat_seq,
+                mask,
+                prior_cf_scales_batch,
+                timestep_respacing=self._prior_sm,
             )
+
+            # Combine text and image features by weighted sum
+            # append text_to_img_feat to img_feats
+            img_feats = torch.cat([img_feats, text_to_img_feat], dim=0)
+            img_weights = torch.tensor(img_weights + [text_weight], device="cuda")
+            img_feat = torch.sum(img_feats * img_weights.unsqueeze(1), dim=0, keepdim=True)
 
             """ Generate 64x64px images """
             images_64_outputs = self._decoder(
