@@ -81,7 +81,8 @@ class BaseSampler:
         )
         if self._use_bf16:
             clip.bfloat16()
-        clip = torch.jit.script(clip)
+        # when using torch.jit.script, model takes very long time to run on the second run
+        # clip = torch.jit.script(clip)
         clip.cuda()
         clip.eval()
         self._clip = clip
