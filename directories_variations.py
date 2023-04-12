@@ -48,7 +48,7 @@ if __name__ == '__main__':
         curr_out_path = out_path / subfolder.name
         curr_out_path.mkdir(exist_ok=True, parents=True)
 
-        img_paths = list(subfolder.glob('*.JPEG'))[:args.n_samples]
+        img_paths = [p for p in subfolder.glob('*') if p.is_file()][:args.n_samples]
 
         for img_path in img_paths:
             img = Image.open(img_path).convert('RGB')
@@ -56,4 +56,4 @@ if __name__ == '__main__':
             img_out = iter(model(img, bsz=args.max_bsz, progressive_mode="final")).__next__()
             img_out = (torch.permute(img_out * 255.0, [0, 2, 3, 1]).type(torch.uint8).cpu().numpy())
             img_out = Image.fromarray(img_out[0])
-            img_out.save(curr_out_path / f'{img_path.stem}.JPEG')
+            img_out.save(curr_out_path / f'{img_path.stem}_{args.seed}.JPEG')
